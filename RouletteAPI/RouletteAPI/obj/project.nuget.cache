@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "Q/43TJIis1vXJ6Tl8WOrcCjr5yCYnBF6ox2SF682D8p6h9SC18t4Mz2dwTDIaGQzXzxpokwRFusBC0Aa9METBg==",
+  "dgSpecHash": "b/+gUIMyXNppfBqvlknDSAcL4WElO0ANwWmTffG5w5LIFmfiPUHlQE0saV6rtodFUupWpL9LQXLmgFylp39xZg==",
   "success": true,
   "projectFilePath": "C:\\Users\\User\\Desktop\\RouletteAPI\\RouletteAPI\\RouletteAPI\\RouletteAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\User\\.nuget\\packages\\microsoft.extensions.apidescription.server\\3.0.0\\microsoft.extensions.apidescription.server.3.0.0.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\sqlite\\3.13.0\\sqlite.3.13.0.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\swashbuckle.aspnetcore\\6.2.3\\swashbuckle.aspnetcore.6.2.3.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.2.3\\swashbuckle.aspnetcore.swagger.6.2.3.nupkg.sha512",
     "C:\\Users\\User\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.2.3\\swashbuckle.aspnetcore.swaggergen.6.2.3.nupkg.sha512",
