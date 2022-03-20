@@ -1,9 +1,10 @@
 ﻿using RouletteAPI.Enum;
 
 namespace RouletteAPI.Models
-{    public class Bet
+{   
+    public class Bet
     {
-        BetType BetType { get; set; }
-        int BetAmount { get; set; }
+        public BetType BetType { get; set; }
+        public int BetAmount { get; set; }
     }
 }
