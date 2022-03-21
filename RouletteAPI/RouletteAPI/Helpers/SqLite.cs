@@ -59,6 +59,7 @@ namespace RouletteAPI.Helpers
                     GameID      INTEGER,
                     BetType     INTEGER,
                     BetAmount   INTEGER,
+                    Values      VARCHAR(200),
                     FOREIGN KEY (GameID) REFERENCES Games(GameID)
                 )";
 
@@ -79,11 +80,11 @@ namespace RouletteAPI.Helpers
 
                 _dbContext.Open();
 
-                var sql = @"INSERT INTO [Bets] (GameID, BetType, BetAmount) VALUES(@GameId, @BetType, @BetAmount)";
+                var sql = @"INSERT INTO [Bets] (GameID, BetType, BetAmount, Values) VALUES(@GameId, @BetType, @BetAmount, @Values)";
 
                 foreach (var bet in betList.Bets)
                 {
-                    await _dbContext.QueryAsync(sql, new { GameId = betList.GameId, BetType = (int)bet.BetType, BetAmount = bet.BetAmount});
+                    await _dbContext.QueryAsync(sql, new { GameId = betList.GameId, BetType = (int)bet.BetType, BetAmount = bet.BetAmount, Values = bet.Values});
                 };
                 
                 return true;
