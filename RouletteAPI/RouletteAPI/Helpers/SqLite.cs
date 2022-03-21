@@ -39,11 +39,22 @@ namespace RouletteAPI.Helpers
                     TableBet    INTEGER
                 );
 
-                INSERT INTO [GAMES] (TableBet) VALUES(20);
-                INSERT INTO [GAMES] (TableBet) VALUES(10);
-                INSERT INTO [GAMES] (TableBet) VALUES(30);
-                INSERT INTO [GAMES] (TableBet) VALUES(50);"
-                    ;
+                INSERT INTO [GAMES] (TableBet) VALUES(20);";
+
+                await _dbContext.QueryAsync(sql);
+
+                sql = @"
+                CREATE TABLE [Bets]
+                (   
+                    ID          INTEGER PRIMARY KEY AUTOINCREMENT,
+                    BetId       INTEGER,
+                    GameID      INTEGER,
+                    BetType     INTEGER,
+                    BetAmount   INTEGER,
+                    [Values]    VARCHAR(200),
+                    SpinID      INTEGER,
+                    FOREIGN KEY (GameID) REFERENCES Games(GameID)
+                )";
 
                 await _dbContext.QueryAsync(sql);
 
@@ -54,25 +65,12 @@ namespace RouletteAPI.Helpers
                     GameID      INTEGER,
                     Value       INTEGER,
                     COLOR       VARCHAR(50),
-                    FOREIGN KEY (GameID) REFERENCES Games(GameID)
+                    BetId       INTEGER UNIQUE,
+                    FOREIGN KEY (GameID) REFERENCES Games(GameID),
+                    FOREIGN KEY (BetID) REFERENCES Bets(BetID)
                 );";
 
                 var data = await _dbContext.QueryAsync(sql);
-
-                sql = @"
-                CREATE TABLE Bets
-                (   
-                    BetID       INTEGER PRIMARY KEY AUTOINCREMENT,
-                    GameID      INTEGER,
-                    BetType     INTEGER,
-                    BetAmount   INTEGER,
-                    Values      VARCHAR(200),
-                    SpinID      INTEGER,
-                    FOREIGN KEY (GameID) REFERENCES Games(GameID),
-                    FOREIGN KEY (SpinID) REFERENCES Spins(SpinID),
-                )";
-
-                await _dbContext.QueryAsync(sql);
             }
             catch (Exception ex)
             {
@@ -80,7 +78,7 @@ namespace RouletteAPI.Helpers
             }
         }
 
-        public async Task<bool> PlaceBet(BetList betList)
+        public async Task<int> PlaceBet(BetList betList)
         {
             try
             {
@@ -89,18 +87,22 @@ namespace RouletteAPI.Helpers
 
                 _dbContext.Open();
 
-                var sql = @"INSERT INTO [Bets] (GameID, BetType, BetAmount, Values) VALUES(@GameId, @BetType, @BetAmount, @Values)";
+                var betId = await _dbContext.QueryAsync(@"SELECT MAX(BetID) Max FROM [Bets]");
+
+                var newBetId = betId.Select(x => x.Max).FirstOrDefault() ?? 1;
+
+                var sql = @"INSERT INTO [Bets] (BetID, GameID, BetType, BetAmount, [Values]) VALUES(@BetID, @GameId, @BetType, @BetAmount, @Values)";
 
                 foreach (var bet in betList.Bets)
                 {
-                    await _dbContext.QueryAsync(sql, new { GameId = betList.GameId, BetType = (int)bet.BetType, BetAmount = bet.BetAmount, Values = bet.Values});
+                    await _dbContext.QueryAsync(sql, new { BetID = newBetId, GameId = betList.GameId, BetType = (int)bet.BetType, BetAmount = bet.BetAmount, Values = bet.Values});
                 };
-                
-                return true;
+
+                return newBetId;
             }
             catch (Exception)
             {
-                return false;
+                return 0;
             }
         }
 
@@ -110,9 +112,11 @@ namespace RouletteAPI.Helpers
 
             string sql = @"
                 SELECT 
+                    BetId,
                     BetType,  
                     BetAmount,
-                    Values,
+                    [Values],
+                    SpinId
                 FROM
                     Bets
                 WHERE 
@@ -125,9 +129,9 @@ namespace RouletteAPI.Helpers
         {
             _dbContext.Open();
 
-            var sql = @"INSERT INTO [Spins] (GameID, Value, Color) VALUES(@GameId, @Value, @Color)";
+            var sql = @"INSERT INTO [Spins] (GameID, Value, Color, BetID) VALUES(@GameId, @Value, @Color, @BetID)";
 
-            await _dbContext.QueryAsync(sql, new { GameId = spin.GameId, Value = spin.Value, Color = spin.Color});
+            await _dbContext.QueryAsync(sql, new { GameId = spin.GameId, Value = spin.Value, Color = spin.Color, BetID = spin.BetId});
         }
 
         public async Task<IEnumerable<Spin>> GetSpinList(int gameId)
@@ -137,13 +141,32 @@ namespace RouletteAPI.Helpers
             string sql = @"
                 SELECT 
                     Value,
-                    Color
+                    Color,
+                    BetID
                 FROM
                     Spins
                 WHERE 
                     GameId = @GameId";
 
             return await _dbContext.QueryAsync<Spin>(sql, new { GameId = gameId });
+        }
+
+        public async Task<int> GetTableBet(int gameId)
+        {
+            _dbContext.Open();
+
+            string sql = @"
+                SELECT 
+                    TableBet
+                FROM
+                    Games
+                WHERE 
+                    GameId = @GameId";
+
+            var tableBet = await _dbContext.QueryAsync(sql, new { GameId = gameId });
+
+            var selectedTableBet = tableBet.Select(x => x.TableBet).FirstOrDefault();
+            return (int)selectedTableBet;
         }
     }
 }
