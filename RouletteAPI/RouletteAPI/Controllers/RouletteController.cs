@@ -7,7 +7,6 @@ namespace RouletteAPI.Controllers
     public class RouletteController : Controller
     {
         private readonly ISqLite _sqLite;
-        private GameSpin gameSpin;
 
         public RouletteController(ISqLite sqLite) => _sqLite = sqLite;
 
@@ -29,21 +28,26 @@ namespace RouletteAPI.Controllers
 
         [HttpGet]
         [Route("Spin")]
-        public async Task<int> GetSpin()
+        public async Task<int> GetSpin(int gameId)
         {
             Random rnd = new Random();
 
-            int value = rnd.Next(1, 37);
-            await gameSpin.UpdateSpin(value);
+            int value = rnd.Next(0, 37);
+            await _sqLite.Spin(new Spin
+            {
+                GameId = gameId,
+                Value = value,
+                Color = value == 0 ? "Green" : value / 2 == 0 ? "Black" : "Red",
+            });
 
             return value;
         }
 
         [HttpGet]
         [Route("ShowPreviousSpins")]
-        public async Task<List<Spin>> GetGameSpin()
+        public async Task<IEnumerable<Spin>> GetGameSpin(int gameId)
         {
-            return await gameSpin.GetPreviousSpins();
+            return await _sqLite.GetSpinList(gameId);
         }
     }
 }

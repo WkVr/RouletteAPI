@@ -2,7 +2,7 @@
 
 namespace RouletteAPI.Models
 {
-    public class GameSpin
+    /*public class GameSpin
     {
         public List<Spin> Spins { get; set; } = null!;
 
@@ -35,13 +35,12 @@ namespace RouletteAPI.Models
         }
 
         public async Task<List<Spin>> GetPreviousSpins() => Spins.Where(s => s.IsSpun).ToList();
-    }
+    */
 
     public class Spin
     {
         public int? GameId { get; set; }
         public int Value { get; set; }
-        public string Color { get; set; }
-        public bool IsSpun { get; set; }
+        public string Color { get; set; } = null!;
     }
 }

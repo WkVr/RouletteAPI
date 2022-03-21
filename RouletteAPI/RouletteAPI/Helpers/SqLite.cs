@@ -48,7 +48,14 @@ namespace RouletteAPI.Helpers
                 await _dbContext.QueryAsync(sql);
 
                 sql = @"
-                SELECT * FROM [Games]";
+                CREATE TABLE [Spins]
+                (
+                    SpinID      INTEGER PRIMARY KEY AUTOINCREMENT,
+                    GameID      INTEGER,
+                    Value       INTEGER,
+                    COLOR       VARCHAR(50),
+                    FOREIGN KEY (GameID) REFERENCES Games(GameID)
+                );";
 
                 var data = await _dbContext.QueryAsync(sql);
 
@@ -60,7 +67,9 @@ namespace RouletteAPI.Helpers
                     BetType     INTEGER,
                     BetAmount   INTEGER,
                     Values      VARCHAR(200),
-                    FOREIGN KEY (GameID) REFERENCES Games(GameID)
+                    SpinID      INTEGER,
+                    FOREIGN KEY (GameID) REFERENCES Games(GameID),
+                    FOREIGN KEY (SpinID) REFERENCES Spins(SpinID),
                 )";
 
                 await _dbContext.QueryAsync(sql);
@@ -101,14 +110,40 @@ namespace RouletteAPI.Helpers
 
             string sql = @"
                 SELECT 
-                    BetType  
-                    BetAmount
+                    BetType,  
+                    BetAmount,
+                    Values,
                 FROM
                     Bets
                 WHERE 
                     GameId = @GameId";
 
             return await _dbContext.QueryAsync<Bet>(sql, new {GameId = gameId});
+        }
+
+        public async Task Spin(Spin spin)
+        {
+            _dbContext.Open();
+
+            var sql = @"INSERT INTO [Spins] (GameID, Value, Color) VALUES(@GameId, @Value, @Color)";
+
+            await _dbContext.QueryAsync(sql, new { GameId = spin.GameId, Value = spin.Value, Color = spin.Color});
+        }
+
+        public async Task<IEnumerable<Spin>> GetSpinList(int gameId)
+        {
+            _dbContext.Open();
+
+            string sql = @"
+                SELECT 
+                    Value,
+                    Color
+                FROM
+                    Spins
+                WHERE 
+                    GameId = @GameId";
+
+            return await _dbContext.QueryAsync<Spin>(sql, new { GameId = gameId });
         }
     }
 }
