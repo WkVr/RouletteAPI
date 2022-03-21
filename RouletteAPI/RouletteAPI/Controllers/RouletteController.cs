@@ -9,19 +9,15 @@ namespace RouletteAPI.Controllers
         private readonly ISqLite _sqLite;
         private GameSpin gameSpin;
 
-        public RouletteController(ISqLite sqLite)
-        {
-            _sqLite = sqLite;
-            gameSpin = new GameSpin();
-        }
+        public RouletteController(ISqLite sqLite) => _sqLite = sqLite;
 
         [HttpGet]
         [Route("GetBets")]
-        public async Task<IEnumerable<Bet>> Get(int gameId) => await _sqLite.GetBetList(gameId);
+        public async Task<IEnumerable<Bet>> GetBets(int gameId) => await _sqLite.GetBetList(gameId);
 
         [HttpPost]
         [Route("PlaceBets")]
-        public async Task<IActionResult> Post([FromBody] BetList betList)
+        public async Task<IActionResult> PostBets([FromBody] BetList betList)
         {
             if (betList == null)
                 return BadRequest("No Bets Selected");
@@ -33,7 +29,7 @@ namespace RouletteAPI.Controllers
 
         [HttpGet]
         [Route("Spin")]
-        public async Task<int> Get()
+        public async Task<int> GetSpin()
         {
             Random rnd = new Random();
 
@@ -41,6 +37,13 @@ namespace RouletteAPI.Controllers
             await gameSpin.UpdateSpin(value);
 
             return value;
+        }
+
+        [HttpGet]
+        [Route("ShowPreviousSpins")]
+        public async Task<List<Spin>> GetGameSpin()
+        {
+            return await gameSpin.GetPreviousSpins();
         }
     }
 }

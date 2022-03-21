@@ -1,33 +1,40 @@
-﻿namespace RouletteAPI.Models
+﻿using System.Data.Entity;
+
+namespace RouletteAPI.Models
 {
     public class GameSpin
     {
-        List<Spin> spins = new List<Spin>();
+        public List<Spin> Spins { get; set; } = null!;
 
         public GameSpin()
         {
-            var spin = new Spin();
-
-            for (int i = 0; i < 37; i++)
+            if(Spins == null)
             {
-                spins.Add(
-                    new Spin
-                    {
-                        Value = i,
-                        Color = i / 2 == 0 ? "Black" : "Red",
-                        IsSpun = false,
-                    });
+                Spins = new List<Spin>();
+
+                for (int i = 0; i < 37; i++)
+                {
+                    Spins.Add(
+                        new Spin
+                        {
+                            Value = i,
+                            Color = i == 0 ? "Green" : i / 2 == 0 ? "Black" : "Red",
+                            IsSpun = false,
+                        });
+                }
             }
         }
 
         public Task UpdateSpin(int value)
         {
-            var spin = spins.FirstOrDefault(x => x.Value == value);
-            if(spin != null)
+            var spin = Spins.ToList().FirstOrDefault(x => x.Value == value);
+            if (spin != null)
                 spin.IsSpun = true;
 
             return Task.CompletedTask;
         }
+
+        public async Task<List<Spin>> GetPreviousSpins() => Spins.Where(s => s.IsSpun).ToList();
     }
 
     public class Spin
